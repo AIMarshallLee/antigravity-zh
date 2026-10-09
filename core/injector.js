@@ -682,6 +682,9 @@
             }
           });
         }
+      }
+    });
+
     // 7. 强化 View Usage 菜单项
     document.querySelectorAll('*').forEach(el => {
       if (el.textContent && el.textContent.includes('View Usage')) {

@@ -96,8 +96,13 @@ async function ensurePageInjected(page) {
         } else if (data.id === 102) {
           clearTimeout(timer);
           ws.close();
-          console.log(`[${new Date().toLocaleTimeString()}] ✅ 检测到新会话/页面未汉化，已自动完成中文补丁注入！(${page.title || 'Antigravity'})`);
-          resolve(true);
+          if (data.result?.exceptionDetails) {
+            console.error(`[${new Date().toLocaleTimeString()}] ❌ 汉化注入脚本执行异常:`, data.result.exceptionDetails.text, data.result.exceptionDetails.exception?.description || '');
+            resolve(false);
+          } else {
+            console.log(`[${new Date().toLocaleTimeString()}] ✅ 检测到新会话/页面未汉化，已自动完成中文补丁注入！(${page.title || 'Antigravity'})`);
+            resolve(true);
+          }
         }
       } catch (e) {
         clearTimeout(timer);
