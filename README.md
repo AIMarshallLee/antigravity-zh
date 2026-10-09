@@ -5,7 +5,7 @@
 <div align="center">
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Platform: macOS](https://img.shields.io/badge/Platform-macOS-brightgreen.svg)]()
+[![Platform: macOS & Windows](https://img.shields.io/badge/Platform-macOS%20%7C%20Windows-brightgreen.svg)]()
 [![Node: >=18](https://img.shields.io/badge/Node-%3E%3D18-blue.svg)](https://nodejs.org/)
 [![Python: >=3.9](https://img.shields.io/badge/Python-%3E%3D3.9-yellow.svg)](https://python.org/)
 [![Status: Active](https://img.shields.io/badge/Status-Maintained-success.svg)]()
@@ -23,7 +23,7 @@ Google Antigravity 是一款强大的 AI 原生 IDE / 智能体客户端，但�
 - **生硬机翻破坏代码生态**：粗暴的汉化脚本容易误将开发者自己的工程项目（如 `Agent`、`AIcode`）或底层技术协议（`MCP`、`Codex`、`Google Chrome`）强行翻译，造成严重视觉困扰。
 - **版本更新汉化失效**：每次 Antigravity 后台更新或重启，传统汉化通常会被覆盖。
 
-**Antigravity-ZH 套件彻底解决了以上所有痛点！**
+**Antigravity-ZH 套件彻底解决了以上所有痛点，原生支持 macOS 与 Windows 10/11 全平台！**
 
 ---
 
@@ -39,11 +39,12 @@ Google Antigravity 是一款强大的 AI 原生 IDE / 智能体客户端，但�
   - 严格识别并保留用户的真实工程目录与代码库名称。
   - `MCP`、`Codex`、`Webcodex`、`Cockpit`、`Mac`、`Google Chrome`、`Gemini`、`Claude`、`GPT` 等专有名词 100% 保持原生英文规范。
 - 🔄 **毫秒级更新自愈 (Auto-Healing Daemon)**：
-  - 基于 macOS 原生 `LaunchAgent` 系统守护机制，自动侦听 Antigravity 客户端生命周期。
+  - **macOS**：集成系统级 `LaunchAgent` 守护服务；
+  - **Windows**：集成纯静默无黑框后台守护服务（开机启动 + 计划任务）；
   - 无论系统重启、应用升级新版本还是新开对话标签，**3 秒内全自动保活汉化，无需用户任何手动干预**！
 - 🔒 **零破坏原生安全架构**：
   - 不篡改、不解包 Electron 二进制或 `app.asar`，不破坏应用官方代码签名。
-  - 通过 Chrome DevTools Protocol (CDP) WebSocket 接口在内存中热载入，安全合规，绝无安全隐患。
+  - 通过 Chrome DevTools Protocol (CDP) WebSocket 接口在内存中热载入，安全合规，绝无封号或崩溃风险。
 - 🧠 **TreeWalker 穿透式 DOM 渲染引擎**：
   - 针对被 `<kbd>`、`<a>` 标签切碎的内联文本碎片，提供深层节点遍历重组，彻底杜绝文字排版错位与漏翻。
 
@@ -51,7 +52,9 @@ Google Antigravity 是一款强大的 AI 原生 IDE / 智能体客户端，但�
 
 ## ⚡ 极速一键安装
 
-打开 macOS 终端，直接粘贴执行以下命令：
+### 🍎 macOS 用户
+
+打开「终端 (Terminal)」，直接粘贴执行以下命令：
 
 ```bash
 # 官方标准一键安装 (推荐)
@@ -61,7 +64,19 @@ curl -fsSL https://raw.githubusercontent.com/AIMarshallLee/antigravity-zh/main/i
 curl -fsSL https://ghproxy.net/https://raw.githubusercontent.com/AIMarshallLee/antigravity-zh/main/install.sh | bash
 ```
 
-> **提示**：安装脚本会自动完成程序部署、环境依赖体检、全局 CLI 命令注册与 LaunchAgent 开机守护配置。
+### 🪟 Windows 用户 (Windows 10 / 11)
+
+按下键盘 `Win + X` 打开 **PowerShell** 或 **Windows Terminal**，直接粘贴执行：
+
+```powershell
+# 官方标准一键安装 (推荐)
+irm https://raw.githubusercontent.com/AIMarshallLee/antigravity-zh/main/install.ps1 | iex
+
+# 国内高速镜像一键安装 (若遇到网络超时请用此命令)
+irm https://ghproxy.net/https://raw.githubusercontent.com/AIMarshallLee/antigravity-zh/main/install.ps1 | iex
+```
+
+> **提示**：安装脚本会自动完成程序部署、环境依赖体检、全局 CLI 命令注册（写入系统 PATH）与后台开机静默守护配置。
 
 ---
 
@@ -121,8 +136,14 @@ curl -fsSL https://ghproxy.net/https://raw.githubusercontent.com/AIMarshallLee/a
 ### 3. 如何彻底卸载？
 如果你想恢复纯英文原生环境，在终端运行一行命令即可彻底干净卸载：
 
+**🍎 macOS 终端**：
 ```bash
 curl -fsSL https://raw.githubusercontent.com/AIMarshallLee/antigravity-zh/main/uninstall.sh | bash
+```
+
+**🪟 Windows PowerShell**：
+```powershell
+irm https://raw.githubusercontent.com/AIMarshallLee/antigravity-zh/main/uninstall.ps1 | iex
 ```
 
 ---

@@ -9,11 +9,37 @@ const path = require('path');
 const os = require('os');
 
 async function getDevToolsPort() {
-  const possiblePaths = [
-    path.join(os.homedir(), 'Library/Application Support/Chromium/DevToolsActivePort'),
-    path.join(os.homedir(), 'Library/Application Support/Antigravity/DevToolsActivePort'),
-    path.join(os.homedir(), 'Library/Application Support/antigravity/DevToolsActivePort')
-  ];
+  const possiblePaths = [];
+
+  if (process.platform === 'win32') {
+    const localAppData = process.env.LOCALAPPDATA || path.join(os.homedir(), 'AppData', 'Local');
+    const appData = process.env.APPDATA || path.join(os.homedir(), 'AppData', 'Roaming');
+    const userProfile = process.env.USERPROFILE || os.homedir();
+
+    possiblePaths.push(
+      path.join(localAppData, 'Chromium', 'DevToolsActivePort'),
+      path.join(localAppData, 'Chromium', 'User Data', 'DevToolsActivePort'),
+      path.join(localAppData, 'Antigravity', 'DevToolsActivePort'),
+      path.join(localAppData, 'Antigravity', 'User Data', 'DevToolsActivePort'),
+      path.join(localAppData, 'antigravity', 'DevToolsActivePort'),
+      path.join(appData, 'Chromium', 'DevToolsActivePort'),
+      path.join(appData, 'Antigravity', 'DevToolsActivePort'),
+      path.join(appData, 'antigravity', 'DevToolsActivePort'),
+      path.join(userProfile, '.antigravity', 'DevToolsActivePort')
+    );
+  } else if (process.platform === 'darwin') {
+    possiblePaths.push(
+      path.join(os.homedir(), 'Library/Application Support/Chromium/DevToolsActivePort'),
+      path.join(os.homedir(), 'Library/Application Support/Antigravity/DevToolsActivePort'),
+      path.join(os.homedir(), 'Library/Application Support/antigravity/DevToolsActivePort')
+    );
+  } else {
+    // Linux
+    possiblePaths.push(
+      path.join(os.homedir(), '.config/chromium/DevToolsActivePort'),
+      path.join(os.homedir(), '.config/antigravity/DevToolsActivePort')
+    );
+  }
 
   for (const p of possiblePaths) {
     if (fs.existsSync(p)) {

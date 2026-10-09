@@ -20,10 +20,19 @@ class AntigravityConfigurator:
             self.home_dir / ".antigravity-ide" / "argv.json",
             self.home_dir / ".antigravity" / "argv.json"
         ]
-        self.settings_paths = [
-            self.home_dir / "Library/Application Support/Antigravity IDE/User/settings.json",
-            self.home_dir / "Library/Application Support/Antigravity/User/settings.json"
-        ]
+        if os.name == 'nt' or sys.platform == 'win32':
+            appdata = os.environ.get("APPDATA")
+            appdata_path = Path(appdata) if appdata else self.home_dir / "AppData" / "Roaming"
+            self.settings_paths = [
+                appdata_path / "Antigravity IDE" / "User" / "settings.json",
+                appdata_path / "Antigravity" / "User" / "settings.json",
+                appdata_path / "antigravity" / "User" / "settings.json",
+            ]
+        else:
+            self.settings_paths = [
+                self.home_dir / "Library/Application Support/Antigravity IDE/User/settings.json",
+                self.home_dir / "Library/Application Support/Antigravity/User/settings.json"
+            ]
 
     def _read_json_with_comments(self, file_path: Path) -> Tuple[Dict[str, Any], str]:
         """读取可能包含注释的 JSON 文件，保留原始文本格式"""
