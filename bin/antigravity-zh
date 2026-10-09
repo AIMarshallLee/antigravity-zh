@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Antigravity-ZH Launcher Script
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+exec python3 "${DIR}/cli.py" "$@"
