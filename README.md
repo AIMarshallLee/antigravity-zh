@@ -54,7 +54,11 @@ Google Antigravity 是一款强大的 AI 原生 IDE / 智能体客户端，但�
 打开 macOS 终端，直接粘贴执行以下命令：
 
 ```bash
+# 官方标准一键安装 (推荐)
 curl -fsSL https://raw.githubusercontent.com/AIMarshallLee/antigravity-zh/main/install.sh | bash
+
+# 国内高速镜像一键安装 (若遇到网络超时请用此命令)
+curl -fsSL https://ghproxy.net/https://raw.githubusercontent.com/AIMarshallLee/antigravity-zh/main/install.sh | bash
 ```
 
 > **提示**：安装脚本会自动完成程序部署、环境依赖体检、全局 CLI 命令注册与 LaunchAgent 开机守护配置。
@@ -68,6 +72,7 @@ curl -fsSL https://raw.githubusercontent.com/AIMarshallLee/antigravity-zh/main/i
 | 命令 | 说明 |
 | :--- | :--- |
 | `antigravity-zh ui` | **立即刷新汉化**：向当前正在运行的 Antigravity 窗口热载入最新汉化 |
+| `antigravity-zh update` | **在线更新**：一键从 GitHub 拉取最新的汉化词典与补丁并立即生效 |
 | `antigravity-zh doctor` | **系统体检**：检测 IDE 语言环境、Git 中文转义支持与守护进程运行状态 |
 | `antigravity-zh autostart status` | **查看状态**：查看开机自启与后台自动保活守护进程的实时运行状态 |
 | `antigravity-zh autostart enable` | **开启守护**：启用开机自启与版本更新自动保活服务 |
@@ -133,8 +138,19 @@ curl -fsSL https://raw.githubusercontent.com/AIMarshallLee/antigravity-zh/main/u
 欢迎加入 **Antigravity 开发者技术交流群**，与全国第一批 Antigravity 极客交流 Agent 工作流、汉化技巧与开发心得！
 
 <div align="center">
-  <img src="assets/wechat-group.png" width="220" alt="Antigravity 开发者交流群" />
-  <p><i>微信扫码即可进群交流（若二维码过期可在 Issue 中留言获取最新二维码）</i></p>
+  <table>
+    <tr>
+      <td align="center">
+        <img src="assets/feishu-group.jpg" width="220" alt="飞书交流群" /><br />
+        <b>飞书交流群 (永久有效)</b>
+      </td>
+      <td align="center">
+        <img src="assets/wechat-group.png" width="220" alt="微信交流群" /><br />
+        <b>微信技术交流群</b>
+      </td>
+    </tr>
+  </table>
+  <p><i>扫码即可加入交流社群（若二维码过期可在 Issue 中留言获取最新加入方式）</i></p>
 </div>
 
 ---

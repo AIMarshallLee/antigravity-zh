@@ -121,6 +121,26 @@ def cmd_enable(configurator: AntigravityConfigurator):
         print(f"     -> {item['message']}")
     print("\n🎉 基础中文开发环境配置已完成！建议结合 'antigravity-zh ui' 获得完整体验。\n")
 
+def cmd_update():
+    print("\n🔄 正在检查并更新 Antigravity-ZH 最新汉化词典...\n")
+    repo_dir = CURRENT_DIR
+    git_dir = repo_dir / ".git"
+    if git_dir.exists():
+        try:
+            res = subprocess.run(["git", "pull", "--rebase"], cwd=str(repo_dir), capture_output=True, text=True, timeout=15)
+            print(res.stdout)
+            if res.returncode == 0:
+                print("✅ 汉化词典与程序已更新至最新版本！")
+                print("⚡ 正在热载入最新词典至 Antigravity...")
+                cmd_ui(None)
+            else:
+                print(f"⚠️ 更新失败: {res.stderr}")
+        except Exception as e:
+            print(f"❌ 更新异常: {e}")
+    else:
+        print("💡 当前为独立安装模式，可重新运行安装脚本进行覆盖更新：")
+        print("   curl -fsSL https://raw.githubusercontent.com/AIMarshallLee/antigravity-zh/main/install.sh | bash\n")
+
 def main():
     parser = argparse.ArgumentParser(
         prog="antigravity-zh",
@@ -133,6 +153,9 @@ def main():
 
     # ui
     subparsers.add_parser("ui", help="立即向 Antigravity 客户端注入实时汉化补丁")
+
+    # update
+    subparsers.add_parser("update", help="检查并更新到最新的汉化词典与程序")
 
     # autostart
     p_auto = subparsers.add_parser("autostart", help="管理开机自启与自动保活守护服务")
@@ -150,6 +173,8 @@ def main():
         cmd_doctor(configurator)
     elif args.command == "ui":
         cmd_ui(args)
+    elif args.command == "update":
+        cmd_update()
     elif args.command == "autostart":
         cmd_autostart(args)
     elif args.command == "enable":
