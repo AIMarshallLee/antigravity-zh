@@ -50,11 +50,23 @@ Google Antigravity 是一款强大的 AI 原生 IDE / 智能体客户端，但�
 
 ---
 
-## ⚡ 极速一键安装
+## ⚡ 极速安装与使用指南
 
-### 🍎 macOS 用户
+### 📦 方式一：小白专属 · 零依赖免配置单文件版 (双击即用 · 强烈推荐)
 
-打开「终端 (Terminal)」，直接粘贴执行以下命令：
+电脑**无需安装 Node.js，无需配置 Python**！纯单文件独立程序，下载后直接双击即可秒级完成汉化与后台开机自愈守护：
+
+- 🪟 **Windows 10 / 11 用户**：前往 **[GitHub Releases 官方下载页](https://github.com/AIMarshallLee/antigravity-zh/releases/latest)** 下载 `antigravity-zh-windows-x64.exe`，**双击直接运行**即可！
+- 🍎 **macOS 用户**：前往 **[GitHub Releases 官方下载页](https://github.com/AIMarshallLee/antigravity-zh/releases/latest)** 下载 `antigravity-zh-macos-universal.tar.gz`，解压双击运行即可！
+
+---
+
+### 💻 方式二：开发者专属 · 终端一行代码自动化安装
+
+适合已有开发环境的工程师与极客，一行命令自动部署最新脚本并注册全局 CLI 命令：
+
+#### 🍎 macOS 用户
+打开「终端 (Terminal)」，直接粘贴执行：
 
 ```bash
 # 官方标准一键安装 (推荐)
@@ -64,8 +76,7 @@ curl -fsSL https://raw.githubusercontent.com/AIMarshallLee/antigravity-zh/main/i
 curl -fsSL https://ghproxy.net/https://raw.githubusercontent.com/AIMarshallLee/antigravity-zh/main/install.sh | bash
 ```
 
-### 🪟 Windows 用户 (Windows 10 / 11)
-
+#### 🪟 Windows 用户 (Windows 10 / 11)
 按下键盘 `Win + X` 打开 **PowerShell** 或 **Windows Terminal**，直接粘贴执行：
 
 ```powershell
@@ -76,7 +87,7 @@ irm https://raw.githubusercontent.com/AIMarshallLee/antigravity-zh/main/install.
 irm https://ghproxy.net/https://raw.githubusercontent.com/AIMarshallLee/antigravity-zh/main/install.ps1 | iex
 ```
 
-> **提示**：安装脚本会自动完成程序部署、环境依赖体检、全局 CLI 命令注册（写入系统 PATH）与后台开机静默守护配置。
+> **提示**：安装脚本全自动完成依赖体检、全局 CLI 命令注册（写入系统 PATH）与后台开机静默守护配置。
 
 ---
 

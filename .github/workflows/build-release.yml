@@ -1,0 +1,107 @@
+name: Build & Release Single Executables
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install PyInstaller
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+
+      - name: Build Windows Standalone Executable (.exe)
+        run: |
+          pyinstaller --noconfirm --onefile --console --name "antigravity-zh-windows-x64" --add-data "core/injector.js;core" app.py
+
+      - name: Upload Windows Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: antigravity-zh-windows-x64
+          path: dist/antigravity-zh-windows-x64.exe
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install PyInstaller
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+
+      - name: Build macOS Standalone Binary
+        run: |
+          pyinstaller --noconfirm --onefile --console --name "antigravity-zh-macos" --add-data "core/injector.js:core" app.py
+          chmod +x dist/antigravity-zh-macos
+          tar -czvf dist/antigravity-zh-macos-universal.tar.gz -C dist antigravity-zh-macos
+
+      - name: Upload macOS Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: antigravity-zh-macos-universal
+          path: dist/antigravity-zh-macos-universal.tar.gz
+
+  release:
+    needs: [build-windows, build-macos]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Download Windows Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: antigravity-zh-windows-x64
+          path: release-assets/
+
+      - name: Download macOS Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: antigravity-zh-macos-universal
+          path: release-assets/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          name: "Antigravity-ZH ${{ github.ref_name }} (零依赖免安装单文件版)"
+          tag_name: ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          body: |
+            ## 🚀 Antigravity-ZH 零依赖单文件版发布
+
+            小白用户无需安装 Node.js，无需安装 Python，下载对应平台文件双击即可秒级完成全界面深度汉化！
+
+            ### 📦 下载专区：
+            - 🪟 **Windows 10 / 11 用户**: 下载 `antigravity-zh-windows-x64.exe`，双击直接运行即可！
+            - 🍎 **macOS 用户**: 下载 `antigravity-zh-macos-universal.tar.gz`，解压双击运行即可！
+
+            ---
+            💬 官方社群：欢迎加入飞书「昆仑增长 AI 交流群」获取最新更新与技术支持！
+          files: |
+            release-assets/antigravity-zh-windows-x64.exe
+            release-assets/antigravity-zh-macos-universal.tar.gz
