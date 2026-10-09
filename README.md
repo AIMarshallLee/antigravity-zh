@@ -142,7 +142,7 @@ curl -fsSL https://raw.githubusercontent.com/AIMarshallLee/antigravity-zh/main/u
     <tr>
       <td align="center">
         <img src="assets/feishu-group.jpg" width="220" alt="飞书交流群" /><br />
-        <b>飞书：AI 工具交流群 (永久有效)</b>
+        <b>飞书：昆仑增长 AI 交流群 (永久有效)</b>
       </td>
       <td align="center">
         <img src="assets/wechat-group.png" width="220" alt="微信交流群" /><br />
