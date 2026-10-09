@@ -134,6 +134,18 @@ curl -fsSL https://raw.githubusercontent.com/AIMarshallLee/antigravity-zh/main/u
 - 欢迎 Fork 本项目并贡献更多专属特性！
 
 
+## 💬 交流与社群
+
+欢迎加入 **昆仑增长 AI 交流群**，与全国开发者交流 Antigravity 使用技巧、Agent 自动化工作流与汉化生态！
+
+<div align="center">
+  <img src="assets/feishu-group.jpg" width="220" alt="飞书：昆仑增长 AI 交流群" /><br />
+  <b>飞书：昆仑增长 AI 交流群 (永久有效)</b><br />
+  <p><i>扫码即可直接加入飞书群 · 免好友申请 · 实时交流与文件共享</i></p>
+</div>
+
+---
+
 ## 📄 开源许可证
 
 本项目基于 [MIT License](LICENSE) 协议完全开源。
