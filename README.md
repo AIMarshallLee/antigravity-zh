@@ -128,8 +128,18 @@ curl -fsSL https://raw.githubusercontent.com/AIMarshallLee/antigravity-zh/main/u
 - 发现界面有漏翻或翻译不准确的地方？欢迎提交 [Issue](https://github.com/AIMarshallLee/antigravity-zh/issues)。
 - 欢迎 Fork 本项目并贡献更多专属特性！
 
+## 💬 交流与社群
+
+欢迎加入 **Antigravity 开发者技术交流群**，与全国第一批 Antigravity 极客交流 Agent 工作流、汉化技巧与开发心得！
+
+<div align="center">
+  <img src="assets/wechat-group.png" width="220" alt="Antigravity 开发者交流群" />
+  <p><i>微信扫码即可进群交流（若二维码过期可在 Issue 中留言获取最新二维码）</i></p>
+</div>
+
 ---
 
 ## 📄 开源许可证
 
 本项目基于 [MIT License](LICENSE) 协议完全开源。
+

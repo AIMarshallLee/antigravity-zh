@@ -126,6 +126,8 @@
     "Building Logic Notes App": "构建 Logic Notes 应用",
     "Openclaw Installation Check": "Openclaw 安装检查",
     "Install ScrapeGraphAI": "安装 ScrapeGraphAI",
+    "AI Assistant Capabilities": "AI 助手能力分析",
+    "AI Assistant Capabilities...": "AI 助手能力分析",
 
     // 设置左侧二级导航项
     "Application": "应用程序",
@@ -433,17 +435,19 @@
     if (USER_PROJECT_NAMES.has(t)) return true;
     if (t.endsWith('/') && t.length > 2) return true;
 
-    // 检查 DOM 特征：若该文本前面有 SVG 文件夹图标，说明是项目或文件夹名称，绝不汉化！
+    // 如果本身就是系统已知词汇，绝不作为项目文件夹跳过
+    if (STATIC_DICT[t] || STATIC_DICT[text]) return false;
+
+    // 检查是否属于项目列表里的项目名称 (带有 Project 特征类名或祖先)
     if (node && node.parentElement) {
       const parent = node.parentElement;
-      const prev = parent.previousElementSibling || node.previousElementSibling;
-      if (prev && prev.tagName && prev.tagName.toLowerCase() === 'svg') {
-        return true;
-      }
-      if (parent.className && typeof parent.className === 'string' && parent.className.includes('text-muted-foreground')) {
-        const grandParent = parent.parentElement;
-        if (grandParent && grandParent.querySelector && grandParent.querySelector('svg')) {
-          if (t === "Agent" || t === "agent") return true;
+      const isProjectItem = parent.closest?.('[data-testid*="project"]') || 
+                            parent.closest?.('div.truncate') ||
+                            (parent.className && typeof parent.className === 'string' && parent.className.includes('text-muted-foreground'));
+      if (isProjectItem) {
+        const prev = parent.previousElementSibling || node.previousElementSibling;
+        if (prev && prev.tagName && prev.tagName.toLowerCase() === 'svg') {
+          return true;
         }
       }
     }
@@ -454,9 +458,15 @@
   function translateStr(str, node) {
     if (!str) return null;
     const clean = str.replace(/\s+/g, ' ').trim();
-    if (!clean || shouldPreserveAsIs(clean, node)) return null;
+    if (!clean) return null;
+    if (USER_PROJECT_NAMES.has(clean)) return null;
 
+    // 1. 优先精准静态词典匹配 (保证 Add Folder, View Usage 等带图标按钮正常汉化)
     if (STATIC_DICT[clean]) return STATIC_DICT[clean];
+    if (STATIC_DICT[str]) return STATIC_DICT[str];
+
+    // 2. 文件夹保护检测
+    if (shouldPreserveAsIs(clean, node)) return null;
 
     // 1. 危险区域动态文案
     let m = clean.match(/^Permanently delete (.+?) including (\d+) active conversations\.?$/i);
