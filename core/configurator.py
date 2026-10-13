@@ -206,10 +206,22 @@ class AntigravityConfigurator:
         """应用全部中文环境推荐配置"""
         results = []
         mod_files = self.fix_ide_locale()
+        check_status = self.check_ide_locale()
+
+        if mod_files:
+            ide_msg = f"已生效: {', '.join(mod_files)}"
+            ide_ok = True
+        elif check_status.get("configured"):
+            ide_msg = "已是 zh-cn 配置"
+            ide_ok = True
+        else:
+            ide_msg = "未检测到 Antigravity IDE 配置目录，已跳过"
+            ide_ok = False
+
         results.append({
             "action": "IDE 界面语言配置 (zh-cn)",
-            "success": True,
-            "message": f"已生效: {', '.join(mod_files)}" if mod_files else "已是 zh-cn 配置"
+            "success": ide_ok,
+            "message": ide_msg
         })
         git_ok = self.fix_git_chinese_support()
         results.append({
