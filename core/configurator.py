@@ -6,6 +6,7 @@ Antigravity 简体中文环境配置管理器
 """
 
 import os
+import sys
 import json
 import subprocess
 from pathlib import Path
@@ -199,3 +200,52 @@ class AntigravityConfigurator:
             "chinese_rule_installed": workspace_rule.exists(),
             "chinese_skill_installed": skill_doc.exists(),
         }
+
+    def apply_all(self) -> List[Dict[str, Any]]:
+        """应用所有中文优化配置"""
+        results = []
+        
+        # 1. 修复 IDE argv.json
+        try:
+            modified_files = self.fix_ide_locale()
+            if modified_files:
+                results.append({
+                    "action": "IDE 语言首选项配置 (argv.json -> zh-cn)",
+                    "success": True,
+                    "message": f"已配置: {', '.join(modified_files)}"
+                })
+            else:
+                results.append({
+                    "action": "IDE 语言首选项配置",
+                    "success": True,
+                    "message": "无需修改或已是 zh-cn"
+                })
+        except Exception as e:
+            results.append({
+                "action": "IDE 语言首选项配置",
+                "success": False,
+                "message": str(e)
+            })
+
+        # 2. 修复 Git 中文文件名支持
+        try:
+            if self.fix_git_chinese_support():
+                results.append({
+                    "action": "Git 全局中文支持 (core.quotepath false & utf-8)",
+                    "success": True,
+                    "message": "已成功设置 Git 全局中文文件名防转义"
+                })
+            else:
+                results.append({
+                    "action": "Git 全局中文支持",
+                    "success": False,
+                    "message": "配置失败"
+                })
+        except Exception as e:
+            results.append({
+                "action": "Git 全局中文支持",
+                "success": False,
+                "message": str(e)
+            })
+
+        return results

@@ -58,6 +58,9 @@
     "Search projects": "搜索项目...",
     "Restart to Update": "重启以更新",
     "Restart to Update ->": "重启以更新 ->",
+    "Open IDE": "打开 IDE",
+    "File": "文件",
+    "Window": "窗口",
 
     // 项目选择器 (Project Picker)
     "No Project": "无项目",
@@ -211,6 +214,14 @@
     "Toggle Voice Recording": "切换语音录制",
     "Find in Pane": "在当前窗格中查找",
     "Add to Chat/Quote": "添加到对话 / 引用",
+    "Archive This Conversation": "归档当前会话",
+    "Archive Conversation": "归档会话",
+    "Unarchive This Conversation": "取消归档当前会话",
+    "Unarchive Conversation": "取消归档会话",
+    "Delete This Conversation": "删除当前会话",
+    "Delete Conversation": "删除会话",
+    "Pin This Conversation": "置顶当前会话",
+    "Pin Conversation": "置顶会话",
     "Toggle Sidebar": "切换侧边栏展开/折叠",
     "Toggle Auxiliary Pane": "切换辅助窗格展开/折叠",
     "Toggle Terminal": "切换终端控制台",
@@ -305,8 +316,31 @@
     "when working in this project": "（在本项目中生效）",
     "Agent settings and permissions for conversations outside of projects.": "配置未归属项目的会话智能体设定及权限规则。",
     "Agent settings and permissions for conversations outside of projects": "配置未归属项目的会话智能体设定及权限规则。",
+    "Security Preset": "安全预设方案",
     "Permission Preset": "权限预设方案",
     "Controls the actions the agent can take.": "控制智能体可执行的操作权限。",
+    "Learn more about Turbo mode": "了解关于极速模式的详情",
+    "Learn more about Turbo mode.": "了解关于极速模式的详情",
+    "Learn more about": "了解关于",
+    "Network Permissions": "网络访问权限",
+    "Terminal & Tooling Permissions": "终端与工具权限",
+    "Terminal Permissions": "终端命令权限",
+    "Tooling Permissions": "工具访问权限",
+    "File Permissions": "文件访问权限",
+    "File & Directory Permissions": "文件与目录权限",
+    "Commands Outside Sandbox": "沙箱外命令权限",
+    "Commands outside sandbox": "沙箱外命令权限",
+    "Commands inside Sandbox": "沙箱内命令权限",
+    "Commands inside sandbox": "沙箱内命令权限",
+    "Configure allowed commands outside the sandbox.": "配置允许在沙箱外部执行的命令。",
+    "Configure allowed commands outside the sandbox": "配置允许在沙箱外部执行的命令。",
+    "Configure allowed commands inside the sandbox.": "配置允许在沙箱内部执行的命令。",
+    "Configure allowed commands inside the sandbox": "配置允许在沙箱内部执行的命令。",
+    "Agent Settings": "智能体设置",
+    "Agent settings": "智能体设置",
+    "Local Permissions": "项目本地权限",
+    "Local permissions": "项目本地权限",
+    "Project Permissions": "项目权限",
     "File Access Rules": "文件访问规则",
     "Configure allowed and denied paths for file reads and writes.": "配置允许和拒绝的文件读取与写入路径。",
     "Network Access Rules": "网络访问规则",
@@ -330,8 +364,21 @@
     "Every command requires approval.": "每次执行命令与写入操作均需要人工审批。",
     "Default": "默认安全模式",
     "Ask before sensitive operations.": "在执行高危或敏感操作前请求人工确认。",
+    "Requires manual review for all terminal commands and file accesses outside of the working folders.": "所有终端命令以及工作目录之外的文件访问均需手动审核。",
+    "Requires manual review for all terminal commands and file accesses outside of the working folders": "所有终端命令以及工作目录之外的文件访问均需手动审核。",
+    "Full machine": "整机访问模式",
+    "Full Machine": "整机访问模式",
+    "All terminal commands require review. The agent can read or write to any file in the machine.": "所有终端命令均需人工审核。智能体可读写本机上的任意文件。",
+    "All terminal commands require review. The agent can read or write to any file in the machine": "所有终端命令均需人工审核。智能体可读写本机上的任意文件。",
     "Turbo": "极速免审核模式 (Turbo)",
+    "Turbo Mode": "极速免审核模式 (Turbo)",
+    "Turbo mode": "极速免审核模式 (Turbo)",
     "Run all commands without restrictions.": "无限制自动执行所有命令，高效全自动推进。",
+    "Disables all safety barriers for maximal iteration velocity.": "禁用所有安全屏障以实现极致迭代速度。",
+    "Disables all safety barriers for maximal iteration velocity": "禁用所有安全屏障以实现极致迭代速度。",
+    "Custom": "自定义配置",
+    "Manually customize individual settings.": "手动自定义各项具体权限设置。",
+    "Manually customize individual settings": "手动自定义各项具体权限设置。",
 
     // 方案审查与行为
     "Agent Behavior": "智能体行为规范",
@@ -568,6 +615,28 @@
     if (mSeeAll) return `查看全部 (${mSeeAll[1]})`;
     if (clean === "See all") return "查看全部";
 
+    if (clean === "just now") return "刚刚";
+    let mTimeAgo = clean.match(/^(\d+)\s*(s|m|h|d)\s*ago$/i);
+    if (mTimeAgo) {
+      const unitMap = { s: "秒前", m: "分钟前", h: "小时前", d: "天前" };
+      return `${mTimeAgo[1]} ${unitMap[mTimeAgo[2].toLowerCase()] || '前'}`;
+    }
+    let mWorked = clean.match(/^Worked for\s*(.+)$/i);
+    if (mWorked) {
+      return `已运行 ${translateTimeString(mWorked[1])}`;
+    }
+    let mThought = clean.match(/^Thought for\s*(.+)$/i);
+    if (mThought) {
+      return `思考了 ${translateTimeString(mThought[1])}`;
+    }
+    let mChanged = clean.match(/^(\d+)\s*files?\s*changed$/i);
+    if (mChanged) {
+      return `${mChanged[1]} 个文件已更改`;
+    }
+    if (clean === "No more older messages" || clean === "No more older messages.") {
+      return "没有更早的消息了";
+    }
+
     return null;
   }
 
@@ -713,6 +782,83 @@
         }
       }
     });
+
+    // 9. 深度修复 Learn more about Turbo mode (解决内联链接拆分)
+    document.querySelectorAll('*').forEach(el => {
+      if (el.textContent && el.textContent.includes('Learn more about')) {
+        const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+        let n;
+        while (n = walker.nextNode()) {
+          const v = n.nodeValue.trim();
+          if (v === "Learn more about" || v === "Learn more about ") {
+            n.nodeValue = "了解关于 ";
+          } else if (v === "Turbo mode" || v === "Turbo mode.") {
+            n.nodeValue = "极速模式的详情";
+          } else if (v === "Learn more about Turbo mode" || v === "Learn more about Turbo mode.") {
+            n.nodeValue = "了解关于极速模式的详情";
+          }
+        }
+      }
+    });
+
+    // 10. 深度修复 Commands Outside Sandbox
+    document.querySelectorAll('*').forEach(el => {
+      if (el.textContent && el.textContent.includes('Commands Outside Sandbox')) {
+        const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+        let n;
+        while (n = walker.nextNode()) {
+          const v = n.nodeValue.trim();
+          if (v === "Commands Outside Sandbox" || v === "Commands outside sandbox") {
+            n.nodeValue = "沙箱外命令权限";
+          }
+        }
+      }
+      if (el.textContent && el.textContent.includes('Configure allowed commands outside the sandbox')) {
+        const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+        let n;
+        while (n = walker.nextNode()) {
+          const v = n.nodeValue.trim();
+          if (v.startsWith("Configure allowed commands outside the sandbox")) {
+            n.nodeValue = "配置允许在沙箱外部执行的命令。";
+          }
+        }
+      }
+    });
+
+    // 11. 深度修复 Agent Settings 与 Local Permissions
+    document.querySelectorAll('*').forEach(el => {
+      if (el.textContent && (el.textContent.trim() === "Agent Settings" || el.textContent.trim() === "Agent settings")) {
+        const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+        let n;
+        while (n = walker.nextNode()) {
+          if (n.nodeValue.trim() === "Agent Settings" || n.nodeValue.trim() === "Agent settings") {
+            n.nodeValue = "智能体设置";
+          }
+        }
+      }
+      if (el.textContent && (el.textContent.trim() === "Local Permissions" || el.textContent.trim() === "Local permissions")) {
+        const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+        let n;
+        while (n = walker.nextNode()) {
+          if (n.nodeValue.trim() === "Local Permissions" || n.nodeValue.trim() === "Local permissions") {
+            n.nodeValue = "项目本地权限";
+          }
+        }
+      }
+    });
+
+    // 12. 深度修复 Archive This Conversation
+    document.querySelectorAll('*').forEach(el => {
+      if (el.textContent && (el.textContent.trim() === "Archive This Conversation" || el.textContent.trim() === "Archive this conversation")) {
+        const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+        let n;
+        while (n = walker.nextNode()) {
+          if (n.nodeValue.trim() === "Archive This Conversation" || n.nodeValue.trim() === "Archive this conversation") {
+            n.nodeValue = "归档当前会话";
+          }
+        }
+      }
+    });
   }
 
   function processNode(node) {
@@ -761,7 +907,7 @@
 
   function sweep() {
     processNode(document.body);
-    const popovers = document.querySelectorAll('[role="dialog"], [role="listbox"], [role="menu"], [role="tooltip"], [data-radix-popper-content-wrapper], [data-radix-menu-content], div.fixed.inset-0');
+    const popovers = document.querySelectorAll('[role="dialog"], [role="listbox"], [role="menu"], [role="tooltip"], [data-radix-popper-content-wrapper], [data-radix-menu-content], [data-state="open"], div.fixed.inset-0');
     popovers.forEach(el => processNode(el));
     fixSpecialDOMElements();
     restoreMistranslatedProjectNodes();

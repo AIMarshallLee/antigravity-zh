@@ -25,6 +25,16 @@ import subprocess
 import threading
 from pathlib import Path
 
+# Windows GBK 终端防乱码与防崩溃处理
+if sys.platform == "win32":
+    try:
+        if sys.stdout.encoding != "utf-8":
+            sys.stdout.reconfigure(encoding="utf-8")
+        if sys.stderr.encoding != "utf-8":
+            sys.stderr.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+
 VERSION = "v1.0.0"
 
 # ==============================================================================
