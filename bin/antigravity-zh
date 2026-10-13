@@ -1,4 +1,13 @@
 #!/usr/bin/env bash
 # Antigravity-ZH Launcher Script
-DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+TARGET="${BASH_SOURCE[0]}"
+while [ -L "$TARGET" ]; do
+  TARGET_DIR="$(cd -P "$(dirname "$TARGET")" >/dev/null 2>&1 && pwd)"
+  TARGET="$(readlink "$TARGET")"
+  [[ $TARGET != /* ]] && TARGET="$TARGET_DIR/$TARGET"
+done
+DIR="$(cd -P "$(dirname "$TARGET")/.." >/dev/null 2>&1 && pwd)"
+if [ ! -f "${DIR}/cli.py" ]; then
+  DIR="$HOME/.antigravity-zh"
+fi
 exec python3 "${DIR}/cli.py" "$@"
