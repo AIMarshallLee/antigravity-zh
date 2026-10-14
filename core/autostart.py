@@ -101,11 +101,33 @@ class AutoStartManager:
                 daemon_path_str = str(self.daemon_script).replace("\\", "\\\\")
                 node_path_str = str(self.node_path).replace("\\", "\\\\")
 
-                # 生成纯静默无黑框 VBScript 启动桥
-                vbs_content = f'Set WshShell = CreateObject("WScript.Shell")\r\nWshShell.Run """{node_path_str}"" ""{daemon_path_str}""", 0, False\r\n'
+                # 生成纯静默无黑框且自动崩溃重启的 VBScript 守护看门狗
+                vbs_content = (
+                    'Set WshShell = CreateObject("WScript.Shell")\r\n'
+                    'Do\r\n'
+                    f'  WshShell.Run """{node_path_str}"" ""{daemon_path_str}""", 0, True\r\n'
+                    '  WScript.Sleep 3000\r\n'
+                    'Loop\r\n'
+                )
                 self.win_vbs_path.write_text(vbs_content, encoding="utf-8")
 
-                # 立即在后台静默启动一次守护进程
+                # 双重保障：注册 Windows 注册表开机自启 (当前用户无需管理员权限，100% 成功)
+                try:
+                    import winreg
+                    key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_ALL_ACCESS)
+                    winreg.SetValueEx(key, "AntigravityZHDaemon", 0, winreg.REG_SZ, f'wscript.exe "{self.win_vbs_path}"')
+                    winreg.CloseKey(key)
+                except Exception:
+                    pass
+
+                # 终止旧的守护进程与看门狗
+                try:
+                    kill_cmd = 'powershell -NoProfile -Command "Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -like \'*daemon.js*\' -or $_.CommandLine -like \'*AntigravityZH-Daemon*\' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force }"'
+                    subprocess.run(kill_cmd, capture_output=True, shell=True)
+                except Exception:
+                    pass
+
+                # 立即在后台静默启动看门狗守护
                 subprocess.Popen(
                     ["wscript.exe", str(self.win_vbs_path)],
                     creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
@@ -162,8 +184,20 @@ class AutoStartManager:
             try:
                 if self.win_vbs_path.exists():
                     self.win_vbs_path.unlink()
-                # 终止正在运行的 daemon 进程
-                cmd = 'powershell -NoProfile -Command "Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -like \'*daemon.js*\' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force }"'
+                # 移除注册表自启项与任务计划
+                try:
+                    import winreg
+                    key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Run", 0, winreg.KEY_ALL_ACCESS)
+                    winreg.DeleteValue(key, "AntigravityZHDaemon")
+                    winreg.CloseKey(key)
+                except Exception:
+                    pass
+                try:
+                    subprocess.run(["schtasks", "/delete", "/tn", WIN_TASK_NAME, "/f"], capture_output=True, shell=True)
+                except Exception:
+                    pass
+                # 终止正在运行的 daemon 进程与看门狗
+                cmd = 'powershell -NoProfile -Command "Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -like \'*daemon.js*\' -or $_.CommandLine -like \'*AntigravityZH-Daemon*\' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force }"'
                 subprocess.run(cmd, capture_output=True, shell=True)
                 return True
             except Exception:

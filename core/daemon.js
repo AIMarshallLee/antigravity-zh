@@ -9,6 +9,14 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
+// 进程级防崩溃保护：网络断开、管道中断或调试接口关闭均不退出守护进程
+process.on('uncaughtException', (err) => {
+  // 忽略单次网络/WebSocket 异常，守护进程保持长效保活
+});
+process.on('unhandledRejection', (reason) => {
+  // 忽略未处理的 Promise 拒绝
+});
+
 const SCRIPT_DIR = __dirname;
 const INJECTOR_PATH = path.join(SCRIPT_DIR, 'injector.js');
 let scriptContent = '';
@@ -68,27 +76,50 @@ function getDevToolsPort() {
 async function ensurePageInjected(page) {
   return new Promise((resolve) => {
     let ws;
+    let timer;
+
+    const cleanup = () => {
+      if (timer) {
+        clearTimeout(timer);
+        timer = null;
+      }
+      if (ws) {
+        try { ws.close(); } catch (e) {}
+      }
+    };
+
+    timer = setTimeout(() => {
+      cleanup();
+      resolve(false);
+    }, 2000);
+
     try {
       ws = new WebSocket(page.webSocketDebuggerUrl);
     } catch (e) {
+      cleanup();
       return resolve(false);
     }
 
-    const timer = setTimeout(() => {
-      try { ws.close(); } catch (e) {}
-      resolve(false);
-    }, 1500);
+    const safeSend = (msg) => {
+      try {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify(msg));
+          return true;
+        }
+      } catch (e) {}
+      return false;
+    };
 
     ws.onopen = () => {
       // 1. 检查是否已被注入
-      ws.send(JSON.stringify({
+      safeSend({
         id: 101,
         method: "Runtime.evaluate",
         params: {
           expression: "!!window.__ANTIGRAVITY_ZH_INJECTED__",
           returnByValue: true
         }
-      }));
+      });
     };
 
     ws.onmessage = (event) => {
@@ -100,28 +131,26 @@ async function ensurePageInjected(page) {
             // 每次注入前确保读取磁盘上最新的 injector.js 脚本
             try { scriptContent = fs.readFileSync(INJECTOR_PATH, 'utf-8'); } catch (e) {}
             // 未注入，立即执行注入
-            ws.send(JSON.stringify({
+            safeSend({
               id: 102,
               method: "Runtime.evaluate",
               params: {
                 expression: scriptContent,
                 returnByValue: true
               }
-            }));
+            });
             // 同时注册页面导航保活
-            ws.send(JSON.stringify({
+            safeSend({
               id: 103,
               method: "Page.addScriptToEvaluateOnNewDocument",
               params: { source: scriptContent }
-            }));
+            });
           } else {
-            clearTimeout(timer);
-            ws.close();
+            cleanup();
             resolve(true);
           }
         } else if (data.id === 102) {
-          clearTimeout(timer);
-          ws.close();
+          cleanup();
           if (data.result?.exceptionDetails) {
             console.error(`[${new Date().toLocaleTimeString()}] ❌ 汉化注入脚本执行异常:`, data.result.exceptionDetails.text, data.result.exceptionDetails.exception?.description || '');
             resolve(false);
@@ -131,14 +160,18 @@ async function ensurePageInjected(page) {
           }
         }
       } catch (e) {
-        clearTimeout(timer);
-        try { ws.close(); } catch (err) {}
+        cleanup();
         resolve(false);
       }
     };
 
     ws.onerror = () => {
-      clearTimeout(timer);
+      cleanup();
+      resolve(false);
+    };
+
+    ws.onclose = () => {
+      cleanup();
       resolve(false);
     };
   });
