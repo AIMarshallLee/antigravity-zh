@@ -229,7 +229,7 @@ def execute_injection() -> bool:
     if not script_code:
         return False
 
-    pages = [t for t in targets if t.get("type") == "page" and "webSocketDebuggerUrl" in t]
+    pages = [t for t in targets if t.get("type") == "page" and "webSocketDebuggerUrl" in t and not str(t.get("url", "")).startswith("data:text/html")]
     success_count = 0
     for page in pages:
         ws_url = page["webSocketDebuggerUrl"]
@@ -247,7 +247,7 @@ def run_daemon_loop():
             if port:
                 req = urllib.request.urlopen(f"http://127.0.0.1:{port}/json", timeout=1)
                 targets = json.loads(req.read().decode("utf-8"))
-                pages = [t for t in targets if t.get("type") == "page" and "webSocketDebuggerUrl" in t]
+                pages = [t for t in targets if t.get("type") == "page" and "webSocketDebuggerUrl" in t and not str(t.get("url", "")).startswith("data:text/html")]
                 for page in pages:
                     ws_url = page["webSocketDebuggerUrl"]
                     # 检查是否已注入
@@ -256,7 +256,7 @@ def run_daemon_loop():
                         c.send_text(json.dumps({
                             "id": 99,
                             "method": "Runtime.evaluate",
-                            "params": {"expression": "!!window.__ANTIGRAVITY_ZH_INJECTED__", "returnByValue": True}
+                            "params": {"expression": "!!(window.__ANTIGRAVITY_ZH_INJECTED__ && window.__ANTIGRAVITY_ZH_OBSERVER__ && window.__ANTIGRAVITY_ZH_INTERVAL__)", "returnByValue": True}
                         }))
                         r = c.recv_text()
                         if '"value":true' not in r:

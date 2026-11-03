@@ -17,7 +17,6 @@
     try { window.__ANTIGRAVITY_ZH_OBSERVER__.disconnect(); } catch (e) {}
     window.__ANTIGRAVITY_ZH_OBSERVER__ = null;
   }
-  window.__ANTIGRAVITY_ZH_INJECTED__ = true;
 
   // 用户项目/文件夹保护白名单 (严禁汉化)
   const USER_PROJECT_NAMES = new Set([
@@ -760,14 +759,13 @@
   }
 
   function sweep() {
-    processNode(document.body);
+    const root = document.body || document.documentElement;
+    if (root) processNode(root);
     const popovers = document.querySelectorAll('[role="dialog"], [role="listbox"], [role="menu"], [role="tooltip"], [data-radix-popper-content-wrapper], [data-radix-menu-content], div.fixed.inset-0');
     popovers.forEach(el => processNode(el));
     fixSpecialDOMElements();
     restoreMistranslatedProjectNodes();
   }
-
-  sweep();
 
   const obs = new MutationObserver((mutations) => {
     for (const m of mutations) {
@@ -787,10 +785,36 @@
     restoreMistranslatedProjectNodes();
   });
 
-  obs.observe(document.body, { childList: true, subtree: true, characterData: true });
-  window.__ANTIGRAVITY_ZH_OBSERVER__ = obs;
+  function initEngine() {
+    sweep();
 
-  window.__ANTIGRAVITY_ZH_INTERVAL__ = setInterval(sweep, 250);
+    const target = document.documentElement || document.body || document;
+    if (target && target.nodeType) {
+      try {
+        obs.observe(target, { childList: true, subtree: true, characterData: true });
+        window.__ANTIGRAVITY_ZH_OBSERVER__ = obs;
+      } catch (e) {
+        console.warn('[Antigravity-ZH] Observer observe failed:', e);
+      }
+    }
 
-  console.log('[Antigravity-ZH] 🚀 全界面终极高精汉化补丁已加载！');
+    if (!window.__ANTIGRAVITY_ZH_INTERVAL__) {
+      window.__ANTIGRAVITY_ZH_INTERVAL__ = setInterval(sweep, 250);
+    }
+    window.__ANTIGRAVITY_ZH_INJECTED__ = true;
+    console.log('[Antigravity-ZH] 🚀 全界面终极高精汉化补丁已加载！');
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initEngine, { once: true });
+    // 即使在 loading 阶段，只要 documentElement 存在就先启动 observer
+    if (document.documentElement) {
+      try {
+        obs.observe(document.documentElement, { childList: true, subtree: true, characterData: true });
+        window.__ANTIGRAVITY_ZH_OBSERVER__ = obs;
+      } catch (e) {}
+    }
+  } else {
+    initEngine();
+  }
 })();

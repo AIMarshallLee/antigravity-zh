@@ -80,12 +80,12 @@ async function ensurePageInjected(page) {
     }, 1500);
 
     ws.onopen = () => {
-      // 1. 检查是否已被注入
+      // 1. 检查是否已被完整注入并正常运行
       ws.send(JSON.stringify({
         id: 101,
         method: "Runtime.evaluate",
         params: {
-          expression: "!!window.__ANTIGRAVITY_ZH_INJECTED__",
+          expression: "!!(window.__ANTIGRAVITY_ZH_INJECTED__ && window.__ANTIGRAVITY_ZH_OBSERVER__ && window.__ANTIGRAVITY_ZH_INTERVAL__)",
           returnByValue: true
         }
       }));
@@ -156,7 +156,7 @@ async function scanAndProtect() {
 
     const res = await fetch(`http://127.0.0.1:${port}/json`, { signal: AbortSignal.timeout(1000) });
     const targets = await res.json();
-    const pages = targets.filter(t => t.type === 'page' && t.webSocketDebuggerUrl);
+    const pages = targets.filter(t => t.type === 'page' && t.webSocketDebuggerUrl && !t.url.startsWith('data:text/html'));
 
     for (const page of pages) {
       await ensurePageInjected(page);
