@@ -6,6 +6,7 @@ Antigravity 简体中文环境配置管理器
 """
 
 import os
+import sys
 import json
 import subprocess
 from pathlib import Path
@@ -188,9 +189,10 @@ class AntigravityConfigurator:
         git_zh = self.check_git_chinese_support()
         term = self.check_terminal_encoding()
 
-        # 检查规则文件是否存在
-        workspace_rule = Path("/Volumes/MOVESPEED/下载/AIcode/.agent/rules/chinese-programming.md")
-        skill_doc = Path("/Volumes/MOVESPEED/下载/AIcode/.agent/skills/antigravity-zh/SKILL.md")
+        # 检查当前工作区或用户目录下的规则与技能扩展
+        cwd = Path.cwd()
+        workspace_rule = cwd / ".agent" / "rules" / "chinese-programming.md"
+        skill_doc = self.home_dir / ".gemini" / "antigravity" / "skills" / "antigravity-zh" / "SKILL.md"
 
         return {
             "ide_locale": ide_locale,
@@ -199,3 +201,32 @@ class AntigravityConfigurator:
             "chinese_rule_installed": workspace_rule.exists(),
             "chinese_skill_installed": skill_doc.exists(),
         }
+
+    def apply_all(self) -> List[Dict[str, Any]]:
+        """应用全部中文环境推荐配置"""
+        results = []
+        mod_files = self.fix_ide_locale()
+        check_status = self.check_ide_locale()
+
+        if mod_files:
+            ide_msg = f"已生效: {', '.join(mod_files)}"
+            ide_ok = True
+        elif check_status.get("configured"):
+            ide_msg = "已是 zh-cn 配置"
+            ide_ok = True
+        else:
+            ide_msg = "未检测到 Antigravity IDE 配置目录，已跳过"
+            ide_ok = False
+
+        results.append({
+            "action": "IDE 界面语言配置 (zh-cn)",
+            "success": ide_ok,
+            "message": ide_msg
+        })
+        git_ok = self.fix_git_chinese_support()
+        results.append({
+            "action": "Git 中文路径转义与 UTF-8 编码 (core.quotepath false)",
+            "success": git_ok,
+            "message": "已开启 Git 中文文件名友好显示" if git_ok else "Git 配置未执行成功"
+        })
+        return results
