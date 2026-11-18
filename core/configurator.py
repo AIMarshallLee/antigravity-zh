@@ -6,6 +6,7 @@ Antigravity 简体中文环境配置管理器
 """
 
 import os
+import sys
 import json
 import subprocess
 from pathlib import Path
