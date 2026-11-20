@@ -120,6 +120,9 @@ class AutoStartManager:
             log_dir = self.home_dir / "Library" / "Logs" / "AntigravityZH"
             log_dir.mkdir(parents=True, exist_ok=True)
 
+            # 安装启动参数包装器，保证任何途径启动 Antigravity 都带 --remote-debugging-port=0
+            self._ensure_mac_wrapper()
+
             stdout_log = str(log_dir / "daemon.log")
             stderr_log = str(log_dir / "error.log")
 
@@ -173,7 +176,44 @@ class AutoStartManager:
                 try:
                     subprocess.run(["launchctl", "unload", str(self.plist_path)], capture_output=True)
                     self.plist_path.unlink()
-                    return True
                 except Exception:
-                    return False
+                    pass
+            self._restore_mac_wrapper()
             return True
+
+    def _ensure_mac_wrapper(self):
+        """为 macOS Antigravity.app 安装自启调试参数包装脚本"""
+        try:
+            macos_dir = Path("/Applications/Antigravity.app/Contents/MacOS")
+            main_bin = macos_dir / "Antigravity"
+            real_bin = macos_dir / "Antigravity.bin"
+
+            if not main_bin.exists():
+                return
+
+            with open(main_bin, "rb") as f:
+                header = f.read(4)
+
+            if not header.startswith(b"#!"):
+                import shutil
+                shutil.copy2(main_bin, real_bin)
+                real_bin.chmod(0o755)
+
+                wrapper = '#!/bin/bash\nDIR="$(cd "$(dirname "$0")" && pwd)"\nexec "$DIR/Antigravity.bin" --remote-debugging-port=0 "$@"\n'
+                main_bin.write_text(wrapper, encoding="utf-8")
+                main_bin.chmod(0o755)
+        except Exception as e:
+            print(f"⚠️ 安装 macOS 启动包装器跳过: {e}")
+
+    def _restore_mac_wrapper(self):
+        """恢复 macOS Antigravity.app 原始二进制"""
+        try:
+            macos_dir = Path("/Applications/Antigravity.app/Contents/MacOS")
+            main_bin = macos_dir / "Antigravity"
+            real_bin = macos_dir / "Antigravity.bin"
+
+            if real_bin.exists():
+                real_bin.replace(main_bin)
+                main_bin.chmod(0o755)
+        except Exception:
+            pass

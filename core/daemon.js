@@ -19,6 +19,37 @@ try {
   console.error('无法读取 injector.js:', e);
 }
 
+// 自动检测与修补 macOS App 启动 Wrapper，确保软件更新后始终带参数启动
+function ensureWrapperInstalled() {
+  if (process.platform === 'darwin') {
+    const macosDir = '/Applications/Antigravity.app/Contents/MacOS';
+    const mainBin = path.join(macosDir, 'Antigravity');
+    const realBin = path.join(macosDir, 'Antigravity.bin');
+
+    if (!fs.existsSync(mainBin)) return;
+
+    try {
+      const buffer = Buffer.alloc(4);
+      const fd = fs.openSync(mainBin, 'r');
+      fs.readSync(fd, buffer, 0, 4, 0);
+      fs.closeSync(fd);
+
+      if (!buffer.toString('utf-8').startsWith('#!')) {
+        console.log(`[${new Date().toLocaleTimeString()}] 发现原生 Antigravity 二进制更新，正在自动修补自启动包装器...`);
+        fs.copyFileSync(mainBin, realBin);
+        fs.chmodSync(realBin, 0o755);
+
+        const wrapperScript = `#!/bin/bash\nDIR="$(cd "$(dirname "$0")" && pwd)"\nexec "$DIR/Antigravity.bin" --remote-debugging-port=0 "$@"\n`;
+        fs.writeFileSync(mainBin, wrapperScript, 'utf-8');
+        fs.chmodSync(mainBin, 0o755);
+        console.log(`[${new Date().toLocaleTimeString()}] ✅ 自启动包装器已成功自愈重置！`);
+      }
+    } catch (e) {
+      // 容错忽略
+    }
+  }
+}
+
 function getDevToolsPort() {
   const possiblePaths = [];
 
@@ -168,6 +199,8 @@ async function scanAndProtect() {
   }
 }
 
-console.log('🛡️ Antigravity 增强版高频实时汉化守护已启动（1秒周期页面巡检）...');
+console.log('🛡️ Antigravity 增强版高频实时汉化守护已启动（1秒周期页面巡检 + 启动器自愈防护）...');
+ensureWrapperInstalled();
+setInterval(ensureWrapperInstalled, 15000);
 scanAndProtect();
 setInterval(scanAndProtect, 1000);
